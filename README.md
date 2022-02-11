@@ -13,10 +13,10 @@ make build
 
 #### Docker
 
-An auto-built image is available at https://hub.docker.com/r/AndreZiviani/ec2-price-exporter/
+An auto-built image is available at https://hub.docker.com/r/andreziviani/ec2-price-exporter/
 
 ```
-docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY AndreZiviani/ec2-price-exporter
+docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY andreziviani/ec2-price-exporter
 ```
 
 ### Run as dev
