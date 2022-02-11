@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: release
-          path: dist/spot-price-exporter_linux_amd64/spot-price-exporter
+          path: dist/ec2-price-exporter_linux_amd64/ec2-price-exporter
 
   push_to_registries:
     name: Push Docker image to Docker Hub and GitHub Packages
