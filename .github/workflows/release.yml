@@ -72,14 +72,14 @@ jobs:
       
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v1
+        uses: docker/metadata-action@v3
         with:
           images: |
             ${{ secrets.DOCKERHUB_USERNAME }}/ec2-price-exporter
             ghcr.io/${{ github.repository }}
       
       - name: Build and push Docker images
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v2
         with:
           context: .
           push: true
