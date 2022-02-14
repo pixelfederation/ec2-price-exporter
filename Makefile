@@ -1,5 +1,5 @@
 EXECUTABLE ?= ec2-price-exporter
-IMAGE ?= AndreZiviani/$(EXECUTABLE)
+IMAGE ?= andreziviani/$(EXECUTABLE)
 TAG ?= dev-$(shell git log -1 --pretty=format:"%h")
 
 LD_FLAGS = -X "main.version=$(TAG)"
