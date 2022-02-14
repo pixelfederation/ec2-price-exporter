@@ -1,8 +1,9 @@
+.envrc
 .idea
 .build
 .tarballs
 .DS_STORE
-spot-price-exporter
+ec2-price-exporter
 bin
 vendor
 .env
