@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/AndreZiviani/ec2-price-exporter/exporter"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/pixelfederation/ec2-price-exporter/exporter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
@@ -38,7 +38,7 @@ func init() {
 }
 
 func main() {
-	log.Infof("Starting AWS EC2 Price exporter. [log-level=%s, product-descriptions=%s, operating-systems=%s, cache=%d, lifecycle=%s]", *rawLevel, *productDescriptions, *operatingSystems, *cache, *lifecycle)
+	log.Infof("Starting AWS EC2 Price exporter. [log-level=%s, regions=%s, product-descriptions=%s, operating-systems=%s, cache=%d, lifecycle=%s]", *rawLevel, *regions, *productDescriptions, *operatingSystems, *cache, *lifecycle)
 
 	var reg []string
 	if len(*regions) == 0 {
