@@ -27,12 +27,18 @@ func (e *Exporter) getSpotPricing(region string, scrapes chan<- scrapeResult) {
 			break
 		}
 		for _, price := range history.SpotPriceHistory {
+			if !isMatchAny(e.instanceRegexes, string(price.InstanceType)) {
+				log.Debugf("Skipping instance type: %s", price.InstanceType)
+				continue
+			}
+
 			value, err := strconv.ParseFloat(*price.SpotPrice, 64)
 			if err != nil {
 				log.WithError(err).Errorf("error while parsing spot price value from API response [region=%s, az=%s, type=%s]", region, *price.AvailabilityZone, price.InstanceType)
 				atomic.AddUint64(&e.errorCount, 1)
 			}
 			log.Debugf("Creating new metric: ec2{region=%s, az=%s, instance_type=%s, product_description=%s} = %v.", region, *price.AvailabilityZone, price.InstanceType, price.ProductDescription, value)
+
 			scrapes <- scrapeResult{
 				Name:               "ec2",
 				Value:              value,

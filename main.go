@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -24,6 +26,7 @@ var (
 	regions             = flag.String("regions", "", "Comma separated list of AWS regions to get pricing for (defaults to *all*)")
 	lifecycle           = flag.String("lifecycle", "", "Comma separated list of Lifecycles (spot or ondemand) to get pricing for (defaults to *all*)")
 	cache               = flag.Int("cache", 0, "How long should the results be cached, in seconds (defaults to *0*)")
+	instanceRegexes     = flag.String("instance-regexes", "", "Comma separated list of instance type regexes (defaults to *all*)")
 )
 
 func init() {
@@ -38,7 +41,7 @@ func init() {
 }
 
 func main() {
-	log.Infof("Starting AWS EC2 Price exporter. [log-level=%s, regions=%s, product-descriptions=%s, operating-systems=%s, cache=%d, lifecycle=%s]", *rawLevel, *regions, *productDescriptions, *operatingSystems, *cache, *lifecycle)
+	log.Infof("Starting AWS EC2 Price exporter. [log-level=%s, regions=%s, product-descriptions=%s, operating-systems=%s, cache=%d, lifecycle=%s, instance-regexes=%s]", *rawLevel, *regions, *productDescriptions, *operatingSystems, *cache, *lifecycle, *instanceRegexes)
 
 	var reg []string
 	if len(*regions) == 0 {
@@ -68,9 +71,20 @@ func main() {
 	if len(lc) == 0 {
 		lc = []string{"spot", "ondemand"}
 	}
+	instReg := splitAndTrim(*instanceRegexes)
+	if len(instReg) == 0 {
+		instReg = []string{".*"}
+	}
+
+	instRegCompiled, err := compileRegexes(instReg)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+
 	validateProductDesc(pds)
 	validateOperatingSystems(oss)
-	exporter, err := exporter.NewExporter(pds, oss, reg, lc, *cache)
+	exporter, err := exporter.NewExporter(pds, oss, reg, lc, *cache, instRegCompiled)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,6 +95,7 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
+
 func splitAndTrim(str string) []string {
 	if str == "" {
 		return []string{}
@@ -124,4 +139,16 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		</html>
 	`))
 
+}
+
+func compileRegexes(regexes []string) ([]*regexp.Regexp, error) {
+	compiledRegexes := make([]*regexp.Regexp, len(regexes))
+	for i, r := range regexes {
+		re, err := regexp.Compile(r)
+		if err != nil {
+			return nil, fmt.Errorf("invalid regex %s: %s", r, err)
+		}
+		compiledRegexes[i] = re
+	}
+	return compiledRegexes, nil
 }

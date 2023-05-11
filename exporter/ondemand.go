@@ -85,11 +85,17 @@ func (e *Exporter) getOnDemandPricing(region string, scrapes chan<- scrapeResult
 	}
 
 	for _, out := range outs {
+		if !isMatchAny(e.instanceRegexes, out.Product.Attributes["instanceType"]) {
+			log.Debugf("Skipping instance type: %s", out.Product.Attributes["instanceType"])
+			continue
+		}
+
 		sku := out.Product.Sku
 		skuOnDemand := fmt.Sprintf("%s.%s", sku, TermOnDemand)
 		skuOnDemandPerHour := fmt.Sprintf("%s.%s", skuOnDemand, TermPerHour)
 
 		value, err := strconv.ParseFloat(out.Terms.OnDemand[skuOnDemand].PriceDimensions[skuOnDemandPerHour].PricePerUnit["USD"], 64)
+
 		if err != nil {
 			log.WithError(err).Errorf("error while parsing spot price value from API response [region=%s, type=%s]", region, out.Product.Attributes["instanceType"])
 			atomic.AddUint64(&e.errorCount, 1)

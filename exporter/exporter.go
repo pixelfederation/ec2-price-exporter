@@ -2,6 +2,7 @@ package exporter
 
 import (
 	"context"
+	"regexp"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -23,6 +24,7 @@ type Exporter struct {
 	totalScrapes        prometheus.Counter
 	pricingMetrics      map[string]*prometheus.GaugeVec
 	instances           map[string]Instance
+	instanceRegexes     []*regexp.Regexp
 	awsCfg              aws.Config
 	cache               int
 	nextScrape          time.Time
@@ -45,7 +47,7 @@ type scrapeResult struct {
 }
 
 // NewExporter returns a new exporter of AWS EC2 Price metrics.
-func NewExporter(pds []string, oss []string, regions []string, lifecycle []string, cache int) (*Exporter, error) {
+func NewExporter(pds []string, oss []string, regions []string, lifecycle []string, cache int, instanceRegexes []*regexp.Regexp) (*Exporter, error) {
 
 	e := Exporter{
 		productDescriptions: pds,
@@ -53,6 +55,7 @@ func NewExporter(pds []string, oss []string, regions []string, lifecycle []strin
 		regions:             regions,
 		lifecycle:           lifecycle,
 		cache:               cache,
+		instanceRegexes:     instanceRegexes,
 		nextScrape:          time.Now(),
 		duration: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "aws_pricing",
@@ -244,6 +247,15 @@ func (e *Exporter) inRegions(r string) bool {
 func contains(elems []string, v string) bool {
 	for _, s := range elems {
 		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+func isMatchAny(regexList []*regexp.Regexp, text string) bool {
+	for _, regex := range regexList {
+		if regex.MatchString(text) {
 			return true
 		}
 	}
