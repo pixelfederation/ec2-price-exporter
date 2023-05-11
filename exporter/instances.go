@@ -46,15 +46,15 @@ func (e *Exporter) getInstances() {
 	}
 }
 
-func (e Exporter) getInstanceMemory(instance string) string {
+func (e *Exporter) getInstanceMemory(instance string) string {
 	return strconv.Itoa(int(e.instances[instance].Memory))
 }
 
-func (e Exporter) getInstanceVCpu(instance string) string {
+func (e *Exporter) getInstanceVCpu(instance string) string {
 	return strconv.Itoa(int(e.instances[instance].VCpu))
 }
 
-func (e Exporter) getNormalizedCost(value float64, instance string) (float64, float64) {
+func (e *Exporter) getNormalizedCost(value float64, instance string) (float64, float64) {
 	vcpu := e.instances[instance].VCpu
 	memory := e.instances[instance].Memory / 1024
 
