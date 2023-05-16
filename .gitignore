@@ -3,7 +3,7 @@
 .build
 .tarballs
 .DS_STORE
-ec2-price-exporter
+/ec2-price-exporter
 bin
 vendor
 .env
