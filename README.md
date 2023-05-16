@@ -13,10 +13,10 @@ make build
 
 #### Docker
 
-An auto-built image is available at https://hub.docker.com/r/andreziviani/ec2-price-exporter/
+An auto-built image is available at https://ghcr.io/pixelfederation/ec2-price-exporter
 
 ```
-docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY andreziviani/ec2-price-exporter
+docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY pixelfederation/ec2-price-exporter
 ```
 
 ### Run as dev
@@ -47,7 +47,25 @@ Usage of ./spot-price-exporter:
         How long should the results be cached, in seconds (defaults to *0*)
   -lifecycle string
         Comma separated list of Lifecycles (spot or ondemand) to get pricing for (defaults to *all*)
+  -instance-regexes string
+        Comma separated list of instance type regexes (defaults to *all*)
 ```
+
+## Installing the Chart
+
+The chart can be installed as follows:
+
+```console
+$ helm repo add ec2-price-exporter https://pixelfederation.github.io/ec2-price-exporter
+$ helm --namespace=ec2-price-exporter install ec2-price-exporter pixelfederation/ec2-price-exporter
+```
+
+To uninstall/delete the `ec2-price-exporter` deployment:
+
+```console
+$ helm uninstall ec2-price-exporter
+```
+The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ### Example metrics
 

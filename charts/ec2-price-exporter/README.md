@@ -12,7 +12,7 @@
 The chart can be installed as follows:
 
 ```console
-$ helm repo add unbound https://pixelfederation.github.io/ec2-price-exporter
+$ helm repo add ec2-price-exporter https://pixelfederation.github.io/ec2-price-exporter
 $ helm --namespace=ec2-price-exporter install ec2-price-exporter pixelfederation/ec2-price-exporter
 ```
 
