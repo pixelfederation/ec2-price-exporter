@@ -1,0 +1,20 @@
+{{ if .Values.serviceMonitor.enabled}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ec2-price-exporter.fullname" . }}
+  labels:
+    {{- include "ec2-price-exporter.labels" . | nindent 4 }}
+spec:
+  endpoints:
+    - targetPort: {{ .Values.service.port }}
+      path: {{ .Values.serviceMonitor.metricsPath }}
+  jobLabel: {{ include "ec2-price-exporter.fullname" . }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  interval: {{ .Values.serviceMonitor.interval }}
+  selector:
+    matchLabels:
+      {{- include "ec2-price-exporter.selectorLabels" . | nindent 6 }}
+{{- end }}

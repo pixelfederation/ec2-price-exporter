@@ -1,0 +1,1 @@
+ec2-price-exporter release has been installed or upgraded. For information on configuring ec2-price-exporter see the readme.
