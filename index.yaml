@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  ec2-price-exporter:
+  - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2023-05-16T14:11:43.134026144Z"
+    description: Prometheus exporter for spot and on-demand instance prices
+    digest: 87293f05398f5b144dfca8baefa612fe71c895629f4dfe22556268abf18ddf7c
+    maintainers:
+    - email: msoltys@pixelfederation.com
+      name: Marian Soltys
+    name: ec2-price-exporter
+    sources:
+    - https://github.com/pixelfederation/ec2-price-exporter
+    - https://github.com/AndreZiviani/ec2-price-exporter
+    - https://github.com/banzaicloud/spot-price-exporter
+    type: application
+    urls:
+    - https://github.com/pixelfederation/ec2-price-exporter/releases/download/ec2-price-exporter-0.1.0/ec2-price-exporter-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-05-16T14:11:43.134033645Z"
