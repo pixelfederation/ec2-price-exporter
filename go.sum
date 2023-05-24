@@ -40,6 +40,8 @@ github.com/aws/aws-sdk-go-v2/service/pricing v1.17.5 h1:89yKwg+Kn3jgjcpxzmbZYH0O
 github.com/aws/aws-sdk-go-v2/service/pricing v1.17.5/go.mod h1:1YtXjD073MNbQvowCxfSsdhGUCJQOt04FVDcs8uYCmI=
 github.com/aws/aws-sdk-go-v2/service/pricing v1.19.5 h1:27pEWARJW4+l8J5Ph+VYhtfloK4bO4EAh9NZflNPNuc=
 github.com/aws/aws-sdk-go-v2/service/pricing v1.19.5/go.mod h1:0M3RD4kWATK59uPAopcN+fPzFtLixgPuSJ2oXEUuX6E=
+github.com/aws/aws-sdk-go-v2/service/savingsplans v1.12.10 h1:ohbm2l0hBxEQIcjwo/uXr9mVqoxt8hMUDk8JX+/cnao=
+github.com/aws/aws-sdk-go-v2/service/savingsplans v1.12.10/go.mod h1:RR7D+zgjUGkadImm7gtG9iBZ1FROKVf4/cjS7Q3x9oo=
 github.com/aws/aws-sdk-go-v2/service/sso v1.11.28 h1:gItLq3zBYyRDPmqAClgzTH8PBjDQGeyptYGHIwtYYNA=
 github.com/aws/aws-sdk-go-v2/service/sso v1.11.28/go.mod h1:wo/B7uUm/7zw/dWhBJ4FXuw1sySU5lyIhVg1Bu2yL9A=
 github.com/aws/aws-sdk-go-v2/service/sso v1.12.9 h1:GAiaQWuQhQQui76KjuXeShmyXqECwQ0mGRMc/rwsL+c=

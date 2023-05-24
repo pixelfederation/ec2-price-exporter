@@ -32,7 +32,7 @@ func (e *Exporter) getOnDemandPricing(region string, scrapes chan<- scrapeResult
 			pricingSvc,
 			&pricing.GetProductsInput{
 				ServiceCode: aws.String("AmazonEC2"),
-				MaxResults:  aws.Int32(100),
+				MaxResults:  aws.Int32(AwsMaxResultsPerPage),
 				Filters: []pricingtypes.Filter{
 					{
 						Field: aws.String("regionCode"),
@@ -66,7 +66,7 @@ func (e *Exporter) getOnDemandPricing(region string, scrapes chan<- scrapeResult
 			pricelist, err := pag.NextPage(context.TODO())
 
 			if err != nil {
-				log.WithError(err).Errorf("error while fetching spot price history [region=%s]", region)
+				log.WithError(err).Errorf("error while fetching ondemand price [region=%s]", region)
 				atomic.AddUint64(&e.errorCount, 1)
 			}
 

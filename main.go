@@ -26,7 +26,8 @@ var (
 	regions             = flag.String("regions", "", "Comma separated list of AWS regions to get pricing for (defaults to *all*)")
 	lifecycle           = flag.String("lifecycle", "", "Comma separated list of Lifecycles (spot or ondemand) to get pricing for (defaults to *all*)")
 	cache               = flag.Int("cache", 0, "How long should the results be cached, in seconds (defaults to *0*)")
-	instanceRegexes     = flag.String("instance-regexes", "", "Comma separated list of instance type regexes (defaults to *all*)")
+	instanceRegexes     = flag.String("instance-regexes", "", "Comma separated list of instance types regexes (defaults to *all*)")
+	savingPlanTypes     = flag.String("saving-plan-types", "", "Comma separated list of saving plans types (defaults to *none)")
 )
 
 func init() {
@@ -41,7 +42,7 @@ func init() {
 }
 
 func main() {
-	log.Infof("Starting AWS EC2 Price exporter. [log-level=%s, regions=%s, product-descriptions=%s, operating-systems=%s, cache=%d, lifecycle=%s, instance-regexes=%s]", *rawLevel, *regions, *productDescriptions, *operatingSystems, *cache, *lifecycle, *instanceRegexes)
+	log.Infof("Starting AWS EC2 Price exporter. [log-level=%s, regions=%s, product-descriptions=%s, operating-systems=%s, cache=%d, lifecycle=%s, instance-regexes=%s, saving-plan-types=%s]", *rawLevel, *regions, *productDescriptions, *operatingSystems, *cache, *lifecycle, *instanceRegexes, *savingPlanTypes)
 
 	var reg []string
 	if len(*regions) == 0 {
@@ -82,9 +83,15 @@ func main() {
 		return
 	}
 
+	spt := splitAndTrim(*savingPlanTypes)
+
 	validateProductDesc(pds)
 	validateOperatingSystems(oss)
-	exporter, err := exporter.NewExporter(pds, oss, reg, lc, *cache, instRegCompiled)
+	validateSavingPlanTypes(spt)
+
+	exporter.NewExporter(pds, oss, reg, lc, *cache, instRegCompiled, spt)
+
+	exporter, err := exporter.NewExporter(pds, oss, reg, lc, *cache, instRegCompiled, spt)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -124,6 +131,17 @@ func validateOperatingSystems(oss []string) {
 			os != "SUSE" &&
 			os != "Windows" {
 			log.Fatalf("Operating System '%s' is not recognized. Available operating system: Linux, RHEL, SUSE, Windows", os)
+		}
+	}
+}
+
+func validateSavingPlanTypes(spt []string) {
+	for _, plan := range spt {
+		if plan != "" &&
+			plan != "Compute" &&
+			plan != "EC2Instance" &&
+			plan != "SageMaker" {
+			log.Fatalf("SavingPlan type '%s' is not recognized. Available SavingPlans types: Compute, EC2Instance, SageMaker", plan)
 		}
 	}
 }

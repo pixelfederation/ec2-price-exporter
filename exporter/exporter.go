@@ -3,6 +3,7 @@ package exporter
 import (
 	"context"
 	"regexp"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -11,6 +12,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/prometheus/client_golang/prometheus"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	AwsMaxResultsPerPage int32 = 100
 )
 
 // Exporter implements the prometheus.Exporter interface, and exports AWS Spot Price metrics.
@@ -25,6 +30,7 @@ type Exporter struct {
 	pricingMetrics      map[string]*prometheus.GaugeVec
 	instances           map[string]Instance
 	instanceRegexes     []*regexp.Regexp
+	savingPlanTypes     []string
 	awsCfg              aws.Config
 	cache               int
 	nextScrape          time.Time
@@ -42,12 +48,15 @@ type scrapeResult struct {
 	InstanceLifecycle  string
 	ProductDescription string
 	OperatingSystem    string
+	SavingPlanOption   string
+	SavingPlanDuration int
+	SavingPlanType     string
 	Memory             string
 	VCpu               string
 }
 
 // NewExporter returns a new exporter of AWS EC2 Price metrics.
-func NewExporter(pds []string, oss []string, regions []string, lifecycle []string, cache int, instanceRegexes []*regexp.Regexp) (*Exporter, error) {
+func NewExporter(pds []string, oss []string, regions []string, lifecycle []string, cache int, instanceRegexes []*regexp.Regexp, savingPlanTypes []string) (*Exporter, error) {
 
 	e := Exporter{
 		productDescriptions: pds,
@@ -56,6 +65,7 @@ func NewExporter(pds []string, oss []string, regions []string, lifecycle []strin
 		lifecycle:           lifecycle,
 		cache:               cache,
 		instanceRegexes:     instanceRegexes,
+		savingPlanTypes:     savingPlanTypes,
 		nextScrape:          time.Now(),
 		duration: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: "aws_pricing",
@@ -83,6 +93,7 @@ func NewExporter(pds []string, oss []string, regions []string, lifecycle []strin
 
 	e.initGauges()
 	e.getInstances()
+
 	return &e, nil
 }
 
@@ -92,19 +103,19 @@ func (e *Exporter) initGauges() {
 		Namespace: "aws_pricing",
 		Name:      "ec2",
 		Help:      "Current price of the instance type.",
-	}, []string{"instance_lifecycle", "instance_type", "region", "availability_zone", "product_description", "operating_system", "memory", "vcpu"})
+	}, []string{"instance_lifecycle", "instance_type", "region", "availability_zone", "product_description", "operating_system", "saving_plan_option", "saving_plan_duration", "saving_plan_type", "memory", "vcpu"})
 
 	e.pricingMetrics["ec2_memory"] = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "aws_pricing",
 		Name:      "ec2_memory",
 		Help:      "Price of each GB of memory of the instance.",
-	}, []string{"instance_lifecycle", "instance_type", "region", "availability_zone"})
+	}, []string{"instance_lifecycle", "instance_type", "region", "availability_zone", "saving_plan_option", "saving_plan_duration", "saving_plan_type"})
 
 	e.pricingMetrics["ec2_vcpu"] = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "aws_pricing",
 		Name:      "ec2_vcpu",
 		Help:      "Price of each VCPU of the instance.",
-	}, []string{"instance_lifecycle", "instance_type", "region", "availability_zone"})
+	}, []string{"instance_lifecycle", "instance_type", "region", "availability_zone", "saving_plan_option", "saving_plan_duration", "saving_plan_type"})
 }
 
 // Describe outputs metric descriptions.
@@ -181,6 +192,11 @@ func (e *Exporter) scrape(scrapes chan<- scrapeResult) {
 			if contains(e.lifecycle, "ondemand") {
 				e.getOnDemandPricing(region, scrapes)
 			}
+
+			if len(e.savingPlanTypes) != 0 {
+				e.getSavingPlanPricing(region, scrapes)
+			}
+
 			return
 
 		}(region)
@@ -214,21 +230,27 @@ func (e *Exporter) setPricingMetrics(scrapes <-chan scrapeResult) {
 		var labels prometheus.Labels
 		if name == "ec2" {
 			labels = map[string]string{
-				"instance_lifecycle":  scr.InstanceLifecycle,
-				"instance_type":       scr.InstanceType,
-				"region":              scr.Region,
-				"availability_zone":   scr.AvailabilityZone,
-				"product_description": scr.ProductDescription,
-				"operating_system":    scr.OperatingSystem,
-				"memory":              scr.Memory,
-				"vcpu":                scr.VCpu,
+				"instance_lifecycle":   scr.InstanceLifecycle,
+				"instance_type":        scr.InstanceType,
+				"region":               scr.Region,
+				"availability_zone":    scr.AvailabilityZone,
+				"product_description":  scr.ProductDescription,
+				"operating_system":     scr.OperatingSystem,
+				"saving_plan_option":   scr.SavingPlanOption,
+				"saving_plan_duration": strconv.Itoa(scr.SavingPlanDuration),
+				"saving_plan_type":     scr.SavingPlanType,
+				"memory":               scr.Memory,
+				"vcpu":                 scr.VCpu,
 			}
 		} else if name == "ec2_memory" || name == "ec2_vcpu" {
 			labels = map[string]string{
-				"instance_lifecycle": scr.InstanceLifecycle,
-				"instance_type":      scr.InstanceType,
-				"region":             scr.Region,
-				"availability_zone":  scr.AvailabilityZone,
+				"instance_lifecycle":   scr.InstanceLifecycle,
+				"instance_type":        scr.InstanceType,
+				"region":               scr.Region,
+				"availability_zone":    scr.AvailabilityZone,
+				"saving_plan_option":   scr.SavingPlanOption,
+				"saving_plan_duration": strconv.Itoa(scr.SavingPlanDuration),
+				"saving_plan_type":     scr.SavingPlanType,
 			}
 		}
 		e.pricingMetrics[name].With(labels).Set(float64(scr.Value))
