@@ -49,6 +49,8 @@ Usage of ./spot-price-exporter:
         Comma separated list of Lifecycles (spot or ondemand) to get pricing for (defaults to *all*)
   -instance-regexes string
         Comma separated list of instance type regexes (defaults to *all*)
+  -saving-plan-types string
+        Comma separated list of saving plans types (defaults to *none)
 ```
 
 ## Installing the Chart

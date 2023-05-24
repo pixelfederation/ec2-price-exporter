@@ -17,6 +17,7 @@ func (e *Exporter) getSpotPricing(region string, scrapes chan<- scrapeResult) {
 		ec2Svc,
 		&ec2.DescribeSpotPriceHistoryInput{
 			StartTime:           aws.Time(time.Now()),
+			MaxResults:          aws.Int32(AwsMaxResultsPerPage),
 			ProductDescriptions: e.productDescriptions,
 		})
 	for pag.HasMorePages() {
