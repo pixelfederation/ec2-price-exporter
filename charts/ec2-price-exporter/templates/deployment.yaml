@@ -45,6 +45,7 @@ spec:
             {{ with .Values.instanceRegexes}}
             - -instance-regexes={{- join "," . }}
             {{- end}}
+            - -saving-plan-types={{ .Values.savingPlanTypes }}
             {{- range $key, $value := .Values.extraArgs }}
             - --{{ $key }}={{ $value }}
             {{- end }}

@@ -2,8 +2,8 @@ apiVersion: v2
 name: ec2-price-exporter
 description: Prometheus exporter for spot and on-demand instance prices
 type: application
-version: 0.2.0
-appVersion: "0.2.2"
+version: 0.3.0
+appVersion: "0.3.0"
 sources:
 - https://github.com/pixelfederation/ec2-price-exporter
 - https://github.com/AndreZiviani/ec2-price-exporter
